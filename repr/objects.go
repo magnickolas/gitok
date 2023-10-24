@@ -12,6 +12,7 @@ type Object interface {
 	// Compressed representation of the object that is stored
 	Compressed() ([]byte, error)
 	Hash() string
+	Representation() []byte
 }
 
 // verify interface compliance
@@ -56,4 +57,8 @@ func (blob *Blob) Compressed() ([]byte, error) {
 
 func (blob *Blob) Hash() string {
 	return hasherHex(blob.Raw())
+}
+
+func (blob *Blob) Representation() []byte {
+	return blob.content
 }

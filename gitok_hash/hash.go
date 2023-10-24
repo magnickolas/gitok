@@ -37,8 +37,13 @@ func saveObject(obj repr.Object) error {
 
 func writeObject(dirName, fileName string, b []byte) error {
 	objDirPath := filepath.Join(constants.Git, constants.Objects, dirName)
-	err := os.MkdirAll(objDirPath, os.ModePerm)
-	if err != nil {
+	_, err := os.Stat(objDirPath)
+	if errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(objDirPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
 		return err
 	}
 	objPath := filepath.Join(objDirPath, fileName)

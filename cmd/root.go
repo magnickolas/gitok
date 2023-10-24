@@ -21,4 +21,5 @@ func Execute() error {
 func init() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashObjectCmd)
+	rootCmd.AddCommand(catFileCmd)
 }
