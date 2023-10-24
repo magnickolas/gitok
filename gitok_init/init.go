@@ -4,30 +4,25 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/magnickolas/gitok/constants"
 )
 
-const git = ".git"
-const head = "HEAD"
-const objects = "objects"
-const refs = "refs"
-
-const refFormat = "ref: refs/heads/%v"
-
 func InitRepo(initBranch string) error {
-	err := os.Mkdir(git, os.ModePerm)
+	err := os.Mkdir(constants.Git, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	err = os.Mkdir(filepath.Join(git, objects), os.ModePerm)
+	err = os.Mkdir(filepath.Join(constants.Git, constants.Objects), os.ModePerm)
 	if err != nil {
 		return err
 	}
-	err = os.Mkdir(filepath.Join(git, refs), os.ModePerm)
+	err = os.Mkdir(filepath.Join(constants.Git, constants.Refs), os.ModePerm)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(filepath.Join(git, head),
-		[]byte(fmt.Sprintf(refFormat, initBranch)), 0644)
+	err = os.WriteFile(filepath.Join(constants.Git, constants.Head),
+		[]byte(fmt.Sprintf(constants.RefFormat, initBranch)), 0644)
 	if err != nil {
 		return err
 	}
