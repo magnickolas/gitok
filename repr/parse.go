@@ -2,16 +2,7 @@ package repr
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
 	"strconv"
-)
-
-var (
-	ErrorCorruptedObject       = errors.New("corrupted object")
-	ErrorCorruptedObjectHeader = fmt.Errorf("%w: corrupted header", ErrorCorruptedObject)
-	ErrorUnknownObjectType     = errors.New("unknown object type")
-	ErrorSizeNotMatch          = errors.New("object size does not match")
 )
 
 func ParseObject(compressed []byte) (Object, error) {
@@ -41,11 +32,13 @@ func ParseObject(compressed []byte) (Object, error) {
 		return nil, ErrorSizeNotMatch
 	}
 
+	r := bytes.NewReader(content)
+
 	switch objType {
 	case "blob":
-		return &Blob{
-			content: content,
-		}, nil
+		return NewBlob(r)
+	case "tree":
+		return NewTree(r)
 	}
-	return nil, ErrorUnknownObjectType
+	return nil, formatErrorUnknownObjectType(objType)
 }

@@ -8,11 +8,11 @@ import (
 	"github.com/magnickolas/gitok/repr"
 )
 
-func CatObject(digest string) ([]byte, error) {
+func CatObject(digest string) (string, error) {
 	dirName, fileName := digest[:2], digest[2:]
 	obj, err := readObject(dirName, fileName)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return obj.Representation(), nil
 }

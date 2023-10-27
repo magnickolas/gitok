@@ -15,7 +15,7 @@ var (
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			if !readFromStdin && len(args) == 0 {
-				panic(fmt.Errorf("expected filename"))
+				fatalln("expected filename")
 			}
 			var r *os.File
 			if readFromStdin {
@@ -24,7 +24,7 @@ var (
 				var err error
 				r, err = os.Open(args[0])
 				if err != nil {
-					panic(err)
+					fatalf("cannot open %v: %v", args[0], err)
 				}
 			}
 			key, err := gitok_hash.ProcessBlob(r, write)
