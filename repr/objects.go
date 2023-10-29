@@ -17,6 +17,7 @@ type Object interface {
 	Digest() string
 	// Representation for pretty-printing an object
 	String() string
+	Type() string
 }
 
 func StripObjectHeader(o Object) []byte {
@@ -60,28 +61,32 @@ func NewBlob(r io.Reader) (*Blob, error) {
 	return new(Blob).Init(r)
 }
 
-func (blob *Blob) Init(r io.Reader) (*Blob, error) {
+func (b *Blob) Init(r io.Reader) (*Blob, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(r)
 	if err != nil {
 		return nil, err
 	}
-	blob.content = buf.Bytes()
-	blob.raw = blob.Raw()
-	return blob, nil
+	b.content = buf.Bytes()
+	b.raw = b.Raw()
+	return b, nil
 }
 
-func (blob *Blob) Raw() []byte {
-	if blob.raw == nil {
-		blob.raw = append(blob.raw, fmt.Sprintf("blob %d", len(blob.content))...)
-		blob.raw = append(blob.raw, 0)
-		blob.raw = append(blob.raw, blob.content...)
+func (b *Blob) Raw() []byte {
+	if b.raw == nil {
+		b.raw = append(b.raw, fmt.Sprintf("b %d", len(b.content))...)
+		b.raw = append(b.raw, 0)
+		b.raw = append(b.raw, b.content...)
 	}
-	return blob.raw
+	return b.raw
 }
 
-func (blob *Blob) String() string {
-	return string(blob.content)
+func (b *Blob) String() string {
+	return string(b.content)
+}
+
+func (b *Blob) Type() string {
+	return "blob"
 }
 
 type Tree struct {
@@ -95,8 +100,8 @@ type nodeType struct {
 	digest string
 }
 
-func (node *nodeType) getType() string {
-	if node.mode == ModeTree {
+func (n *nodeType) getType() string {
+	if n.mode == ModeTree {
 		return "tree"
 	}
 	return "blob"
@@ -117,7 +122,7 @@ func NewTree(r io.Reader) (*Tree, error) {
 	return new(Tree).Init(r)
 }
 
-func (tree *Tree) Init(r io.Reader) (*Tree, error) {
+func (t *Tree) Init(r io.Reader) (*Tree, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(r)
 	if err != nil {
@@ -142,20 +147,20 @@ func (tree *Tree) Init(r io.Reader) (*Tree, error) {
 		name, b = string(parts[0]), parts[1]
 		var digest string
 		digest, b = hex.EncodeToString(b[:20]), b[20:]
-		tree.children = append(tree.children, nodeType{
+		t.children = append(t.children, nodeType{
 			name:   name,
 			mode:   mode,
 			digest: digest,
 		})
 	}
-	tree.raw = tree.Raw()
-	return tree, nil
+	t.raw = t.Raw()
+	return t, nil
 }
 
-func (tree *Tree) Raw() []byte {
-	if tree.raw == nil {
+func (t *Tree) Raw() []byte {
+	if t.raw == nil {
 		var entries []byte
-		for _, child := range tree.children {
+		for _, child := range t.children {
 			var rawDigest []byte
 			rawDigest, _ = hex.DecodeString(child.digest)
 			entries = append(entries, child.mode...)
@@ -164,15 +169,15 @@ func (tree *Tree) Raw() []byte {
 			entries = append(entries, 0)
 			entries = append(entries, rawDigest...)
 		}
-		tree.raw = append(tree.raw, fmt.Sprintf("tree %d", len(entries))...)
-		tree.raw = append(tree.raw, 0)
-		tree.raw = append(tree.raw, entries...)
+		t.raw = append(t.raw, fmt.Sprintf("t %d", len(entries))...)
+		t.raw = append(t.raw, 0)
+		t.raw = append(t.raw, entries...)
 	}
-	return tree.raw
+	return t.raw
 }
 
-func (blob *Tree) String() (res string) {
-	for _, child := range blob.children {
+func (t *Tree) String() (res string) {
+	for _, child := range t.children {
 		res += fmt.Sprintf(
 			"%06s %s %s\t%s\n",
 			child.mode,
@@ -182,4 +187,8 @@ func (blob *Tree) String() (res string) {
 		)
 	}
 	return
+}
+
+func (t *Tree) Type() string {
+	return "tree"
 }

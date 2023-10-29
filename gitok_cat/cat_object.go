@@ -5,6 +5,14 @@ import (
 	"github.com/magnickolas/gitok/repr"
 )
 
+func GetObjectType(digest string) (string, error) {
+	o, err := fs.ReadObject(digest)
+	if err != nil {
+		return "", err
+	}
+	return o.Type(), nil
+}
+
 func CatObject(digest string) (string, error) {
 	o, err := fs.ReadObject(digest)
 	if err != nil {
