@@ -6,6 +6,14 @@ import (
 	"encoding/hex"
 )
 
+func hashSize() int {
+	if true { // TODO: parse hash type from config
+		return sha1.Size
+	} else {
+		return sha256.Size
+	}
+}
+
 func hasherHex(data []byte) string {
 	if true { // TODO: parse hash type from config
 		digest := sha1.Sum(data)
