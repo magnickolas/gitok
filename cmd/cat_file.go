@@ -13,14 +13,20 @@ var (
 		Short: "Print object info",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			objStr, err := gitok_cat.CatObject(args[0])
+			var str string
+			var err error
+			if prettyPrint {
+				str, err = gitok_cat.PrettyCatObject(args[0])
+			} else {
+				str, err = gitok_cat.CatObject(args[0])
+			}
 			if err != nil {
 				panic(err)
 			}
-			fmt.Print(objStr)
+			fmt.Print(str)
 		},
 	}
-	prettyPrint bool // TODO process it
+	prettyPrint bool
 )
 
 func init() {

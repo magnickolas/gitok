@@ -9,12 +9,18 @@ import (
 )
 
 type Object interface {
-	// Uncompressed representation of the object
+	// Object's bytes
 	Raw() []byte
-	// Compressed representation of the object that is stored
+	// Compressed object's bytes
 	Compressed() ([]byte, error)
-	Hash() string
-	Representation() string
+	// Object's digest (hex string)
+	Digest() string
+	// Representation for pretty-printing an object
+	String() string
+}
+
+func StripObjectHeader(o Object) []byte {
+	return bytes.SplitN(o.Raw(), []byte{0}, 2)[1]
 }
 
 type LazyObject struct {
@@ -34,7 +40,7 @@ func (lo *LazyObject) Compressed() ([]byte, error) {
 	return lo.lazyCompressed, nil
 }
 
-func (lo *LazyObject) Hash() string {
+func (lo *LazyObject) Digest() string {
 	if lo.lazyDigest == "" {
 		lo.lazyDigest = hasherHex(lo.raw)
 	}
@@ -74,7 +80,7 @@ func (blob *Blob) Raw() []byte {
 	return blob.raw
 }
 
-func (blob *Blob) Representation() string {
+func (blob *Blob) String() string {
 	return string(blob.content)
 }
 
@@ -165,7 +171,7 @@ func (tree *Tree) Raw() []byte {
 	return tree.raw
 }
 
-func (blob *Tree) Representation() (res string) {
+func (blob *Tree) String() (res string) {
 	for _, child := range blob.children {
 		res += fmt.Sprintf(
 			"%06s %s %s\t%s\n",
