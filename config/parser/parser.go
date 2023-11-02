@@ -105,14 +105,29 @@ func (p *Parser) nextSection() (Entry, error) {
 	line = line[1 : len(line)-1]
 	parts := strings.SplitN(line, " ", 2)
 	if len(parts) == 1 {
-		section := parts[0]
-		if len(section) == 0 || !isValidSection(section) {
+		parts := strings.SplitN(parts[0], ".", 2)
+		if len(parts) == 1 {
+			section := strings.ToLower(parts[0])
+			if len(section) == 0 || !isValidSection(section) {
+				return nil, p.fmtError("invalid section name")
+			}
+			return Section{section: section}, nil
+		}
+		// old syntax [section.subsection]
+		section, subsection := strings.ToLower(parts[0]), strings.ToLower(parts[1])
+		if !isValidSection(section) {
 			return nil, p.fmtError("invalid section name")
 		}
-		return Section{section: section}, nil
+		if !isValidSection(subsection) {
+			return nil, p.fmtError("invalid subsection name")
+		}
+		return SectionSubsection{
+			section:    section,
+			subsection: subsection,
+		}, nil
 	}
 	var section string
-	section, line = parts[0], strings.TrimSpace(parts[1])
+	section, line = strings.ToLower(parts[0]), strings.TrimSpace(parts[1])
 	if !isValidSection(section) {
 		return nil, p.fmtError("invalid section name")
 	}
