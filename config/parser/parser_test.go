@@ -54,7 +54,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			input: `[section]
-				    key1 = "value1  " ; comment
+				    key1 = "value1  " # comment
 					key2 = part1\b\n\t\"\\part2`,
 			want: []parser.KeyValue{
 				{Key: "section.key1", Value: "value1  "},
@@ -71,6 +71,21 @@ func TestParse(t *testing.T) {
 				{Key: "section2.key2", Value: "value2"},
 			},
 		},
+		{
+			input:   "[section \"subsec\x00tion\"]",
+			wantErr: true,
+		},
+		{
+			input:   "[section \"subsec\ntion\"]",
+			wantErr: true,
+		},
+		{
+			input: `[section "subsec\\\"tion"]
+			          key1 = value1`,
+			want: []parser.KeyValue{
+				{Key: `section.subsec\"tion.key1`, Value: "value1"},
+			},
+		},
 	}
 	for _, test := range tests {
 		r := strings.NewReader(test.input)
@@ -79,11 +94,17 @@ func TestParse(t *testing.T) {
 			t.Error("failed to initialize parser")
 		}
 		got, err := p.Parse()
-		if !test.wantErr && err != nil {
-			t.Error("failed to parse")
-		}
-		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("incorrect result: wanted %#v, got %#v", test.want, got)
+		if test.wantErr {
+			if err == nil {
+				t.Errorf("wanted error for %#v", test.input)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("failed to parse %#v", test.input)
+			}
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("incorrect result for %#v: wanted %#v, got %#v", test.input, test.want, got)
+			}
 		}
 	}
 }
