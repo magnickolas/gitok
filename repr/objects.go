@@ -146,7 +146,7 @@ func (t *Tree) Init(r io.Reader) (*Tree, error) {
 		var name string
 		name, b = string(parts[0]), parts[1]
 		var digest string
-		digest, b = hex.EncodeToString(b[:hashSize()]), b[hashSize():]
+		digest, b = hex.EncodeToString(b[:HashSize()]), b[HashSize():]
 		t.children = append(t.children, nodeType{
 			name:   name,
 			mode:   mode,

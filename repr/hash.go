@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 )
 
-func hashSize() int {
+func HashSize() int {
 	if true { // TODO: parse hash type from config
 		return sha1.Size
 	} else {

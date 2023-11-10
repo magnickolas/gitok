@@ -21,4 +21,5 @@ func init() {
 	rootCmd.AddCommand(hashObjectCmd)
 	rootCmd.AddCommand(catFileCmd)
 	rootCmd.AddCommand(configCmd)
+	rootCmd.AddCommand(statusCmd)
 }
